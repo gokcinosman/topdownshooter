@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class WeaponPickup : MonoBehaviour
 {
+
     public IWeapon weaponToEquip;
     private void Start()
     {
-        weaponToEquip = GetComponent<IWeapon>();
+        weaponToEquip = GetComponentInParent<IWeapon>();
     }
 }

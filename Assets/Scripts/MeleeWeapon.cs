@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeleeWeapon : IMeleeWeapon
+public class MeleeWeapon : MonoBehaviour, IMeleeWeapon
 {
     public int Damage { get; private set; }
     public float Speed { get; private set; }
