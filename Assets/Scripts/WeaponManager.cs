@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -10,17 +11,31 @@ public class WeaponManager : MonoBehaviour
     public GameObject weaponHolder; // Optional: A GameObject where weapons are attached in the scene
     private bool isColliding = false;
     public GameObject collidedWeapon;
+    private float attackTimer;
 
     // Method to equip a new weapon
     public void EquipWeapon(IWeapon newWeapon)
     {
         currentWeapon = newWeapon;
+        attackTimer = currentWeapon.Cooldown;
+        if (currentWeapon is MonoBehaviour weaponObj)
+        {
+            weaponObj.GetComponent<Collider2D>().enabled = false;
+        }
+
+
+
         PlaceWeaponInHolder();
         Debug.Log("Equipped new weapon: " + newWeapon.GetType().Name);
     }
     public void UnequipWeapon()
     {
+        if (currentWeapon is MonoBehaviour weaponObj)
+        {
+            weaponObj.GetComponent<Collider2D>().enabled = true;
+        }
         currentWeapon = null;
+
         RemoveWeaponFromHolder();
 
 
@@ -37,9 +52,10 @@ public class WeaponManager : MonoBehaviour
 
         if (currentWeapon is MonoBehaviour weaponObj)
         {
+
             weaponObj.transform.SetParent(weaponHolder.transform);
             weaponObj.transform.localPosition = Vector3.zero;
-            weaponObj.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+            weaponObj.transform.localRotation = Quaternion.Euler(0, -90, 0);
         }
     }
     public void RemoveWeaponFromHolder()
@@ -59,13 +75,11 @@ public class WeaponManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && isColliding)
         {
-            Debug.Log("E key pressed");
             EquipWeapon(collidedWeapon.GetComponent<WeaponPickup>().weaponToEquip);
-            Debug.Log("Equipped weapon: " + collidedWeapon.GetComponent<WeaponPickup>().weaponToEquip);
-
         }
+
         HandleInput();
     }
 
@@ -74,46 +88,61 @@ public class WeaponManager : MonoBehaviour
         if (currentWeapon == null)
             return;
 
-        // Attacking with the current weapon
-        if (Input.GetMouseButtonDown(0) && !IsReloading())
+        // Saldırı zamanlayıcısını güncelle
+
+        attackTimer -= Time.deltaTime;
+        // Eğer sol fare tuşuna basılı tutuluyorsa ve cooldown süresi dolmuşsa
+        if (Input.GetMouseButton(0) && attackTimer <= 0)
         {
             currentWeapon.Attack();
+            attackTimer = currentWeapon.Cooldown;
         }
 
-        // For ranged weapons: handle reloading
-        if (currentWeapon is IRangedWeapon rangedWeapon && Input.GetKeyDown(KeyCode.R) && !IsReloading())
-        {
-            StartCoroutine(ReloadRoutine(rangedWeapon));
-        }
-
-        // Throwing the weapon if it's throwable
+        // Silahı fırlatma kontrolü
         if (currentWeapon.IsThrowable && Input.GetMouseButtonDown(1))
         {
             ThrowWeapon();
         }
-
-
     }
 
-    private bool IsReloading() => currentWeapon is IRangedWeapon rangedWeapon && rangedWeapon.IsReloading;
+
 
     private void ThrowWeapon()
     {
         Debug.Log("Throwing the weapon!");
-        // Add logic for throwing the weapon (optional: remove the weapon after throwing)
+        RemoveWeaponFromHolder();
+
         if (currentWeapon is MonoBehaviour weaponObj)
         {
             Debug.Log("Throwing weapon: " + weaponObj.name);
             UnequipWeapon();
-            var weaponRb = weaponObj.GetComponent<Rigidbody2D>();
-            weaponRb.isKinematic = false;
-            weaponObj.transform.localRotation = Quaternion.Euler(180, 90, 0);
-            weaponRb.AddForce(transform.up * 20, ForceMode2D.Impulse);
-            float spinForce = 10f; // Adjust the spin force as needed
-            weaponRb.AddTorque(spinForce, ForceMode2D.Impulse);
-        }
 
+            var weaponRb = weaponObj.GetComponent<Rigidbody2D>();
+            if (weaponRb != null)
+            {
+                weaponRb.isKinematic = false;
+                weaponRb.gravityScale = 1f; // Yerçekimi etkisini aktif et
+                weaponRb.drag = 2f; // Yavaşlama etkisini artır
+                weaponObj.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                weaponRb.AddForce(transform.up * 20, ForceMode2D.Impulse);
+                float spinForce = 10f;
+                weaponRb.AddTorque(spinForce, ForceMode2D.Impulse);
+                StartCoroutine(MakeWeaponKinematic(weaponRb));
+
+
+            }
+        }
     }
+    private IEnumerator MakeWeaponKinematic(Rigidbody2D weaponRb)
+    {
+        yield return new WaitForSeconds(1f); // Bekleme süresi
+
+        weaponRb.velocity = Vector2.zero; // Hızı sıfırla
+        weaponRb.angularVelocity = 0f; // Dönme hızını sıfırla
+        weaponRb.isKinematic = true; // Kinematik hale getir
+    }
+
+
 
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -136,13 +165,5 @@ public class WeaponManager : MonoBehaviour
     }
 
 
-    private IEnumerator ReloadRoutine(IRangedWeapon rangedWeapon)
-    {
-        Debug.Log("Reloading...");
-        rangedWeapon.IsReloading = true;
-        yield return new WaitForSeconds(rangedWeapon.ReloadTime);
-        rangedWeapon.Reload();
-        rangedWeapon.IsReloading = false;
-        Debug.Log("Reload complete.");
-    }
+
 }

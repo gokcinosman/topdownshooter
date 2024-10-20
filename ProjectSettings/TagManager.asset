@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Weapon
   - WeaponPickup
+  - Enemy
+  - Wall
+  - Ground
   layers:
   - Default
   - TransparentFX

@@ -8,10 +8,9 @@ public class RangedWeapon : MonoBehaviour, IRangedWeapon
     public float Speed { get; private set; }
     public bool IsThrowable { get; private set; }
     public int AmmoCount { get; private set; }
-    public float ReloadTime { get; private set; }
-    public int MaxAmmoCount { get; private set; }
     public int MultiShotCount { get; private set; }
-    public bool IsReloading { get; set; }  // New property
+    public float Cooldown { get; private set; }
+
 
     public GameObject projectilePrefab; // Reference to the projectile prefab
     public Transform firePoint; // Where projectiles are spawned
@@ -21,18 +20,16 @@ public class RangedWeapon : MonoBehaviour, IRangedWeapon
         // Initialize weapon properties
         Damage = 10; // Example value
         Speed = 1.0f; // Example value
-        AmmoCount = 5; // Example value
-        ReloadTime = 2.0f; // Example value
-        MaxAmmoCount = 10; // Example value
+        AmmoCount = 10; // Example value
+        Cooldown = 0.2f; // Example value
         MultiShotCount = 1; // Example value
         IsThrowable = true; // Example value
     }
 
     public void Attack()
     {
-        if (AmmoCount <= 0 || IsReloading)
+        if (AmmoCount <= 0)
         {
-            Debug.Log("No ammo or reloading!");
             return;
         }
 
@@ -42,14 +39,8 @@ public class RangedWeapon : MonoBehaviour, IRangedWeapon
             SpawnProjectile();
         }
         AmmoCount--;
-        Debug.Log("Shot fired! Ammo left: " + AmmoCount);
     }
 
-    public void Reload()
-    {
-        Debug.Log("Reloading weapon...");
-        AmmoCount = MaxAmmoCount; // Refill ammo
-    }
 
     private void SpawnProjectile()
     {
@@ -68,9 +59,9 @@ public class RangedWeapon : MonoBehaviour, IRangedWeapon
         {
             rb.AddForce(firePoint.up * projectileForce, ForceMode2D.Impulse);
         }
-        else
-        {
-            Debug.LogWarning("Projectile does not have a Rigidbody2D component!");
-        }
+
+
     }
+
+
 }

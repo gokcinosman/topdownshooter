@@ -3,6 +3,7 @@ public interface IWeapon
     int Damage { get; }
     float Speed { get; }
     bool IsThrowable { get; }
+    float Cooldown { get; }
     void Attack();
 }
 
@@ -14,9 +15,8 @@ public interface IMeleeWeapon : IWeapon
 public interface IRangedWeapon : IWeapon
 {
     int AmmoCount { get; }
-    int MaxAmmoCount { get; }
     int MultiShotCount { get; }
-    float ReloadTime { get; }
-    bool IsReloading { get; set; } // New property
-    void Reload();
+
+
+
 }
