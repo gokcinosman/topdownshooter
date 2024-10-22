@@ -7,8 +7,22 @@ public class MeleeWeapon : MonoBehaviour, IMeleeWeapon
     public bool IsThrowable { get; private set; }
     public float KnockBackForce { get; private set; }
     public float Cooldown { get; private set; }
+    [SerializeField]
+    private Sprite _equippedSprite;
+    [SerializeField]
+    private Sprite _unequippedSprite;
 
-    private float currentCooldownTime = 0f;
+    public Sprite equippedSprite
+    {
+        get => _equippedSprite;
+        set => _equippedSprite = value;
+    }
+
+    public Sprite unequippedSprite
+    {
+        get => _unequippedSprite;
+        set => _unequippedSprite = value;
+    }
     private void Start()
     {
         Damage = 10; // Example value

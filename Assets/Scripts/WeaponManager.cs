@@ -17,23 +17,38 @@ public class WeaponManager : MonoBehaviour
     public void EquipWeapon(IWeapon newWeapon)
     {
         currentWeapon = newWeapon;
-        attackTimer = currentWeapon.Cooldown;
         if (currentWeapon is MonoBehaviour weaponObj)
         {
             weaponObj.GetComponent<Collider2D>().enabled = false;
+            EquipSprite(weaponObj.GetComponent<IWeapon>().equippedSprite);
         }
-
-
+        attackTimer = currentWeapon.Cooldown;
 
         PlaceWeaponInHolder();
         Debug.Log("Equipped new weapon: " + newWeapon.GetType().Name);
+    }
+    public void EquipSprite(Sprite newSprite)
+    {
+        if (currentWeapon is MonoBehaviour weaponObj)
+        {
+            weaponObj.GetComponent<SpriteRenderer>().sprite = weaponObj.GetComponent<IWeapon>().equippedSprite;
+        }
+    }
+    public void UnequipSprite(Sprite newSprite)
+    {
+        if (currentWeapon is MonoBehaviour weaponObj)
+        {
+            weaponObj.GetComponent<SpriteRenderer>().sprite = weaponObj.GetComponent<IWeapon>().unequippedSprite;
+        }
     }
     public void UnequipWeapon()
     {
         if (currentWeapon is MonoBehaviour weaponObj)
         {
             weaponObj.GetComponent<Collider2D>().enabled = true;
+            UnequipSprite(weaponObj.GetComponent<IWeapon>().unequippedSprite);
         }
+
         currentWeapon = null;
 
         RemoveWeaponFromHolder();
@@ -55,7 +70,8 @@ public class WeaponManager : MonoBehaviour
 
             weaponObj.transform.SetParent(weaponHolder.transform);
             weaponObj.transform.localPosition = Vector3.zero;
-            weaponObj.transform.localRotation = Quaternion.Euler(0, -90, 0);
+            weaponObj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
         }
     }
     public void RemoveWeaponFromHolder()
@@ -123,7 +139,6 @@ public class WeaponManager : MonoBehaviour
                 weaponRb.isKinematic = false;
                 weaponRb.gravityScale = 1f; // Yerçekimi etkisini aktif et
                 weaponRb.drag = 2f; // Yavaşlama etkisini artır
-                weaponObj.transform.localRotation = Quaternion.Euler(0, 180, 0);
                 weaponRb.AddForce(transform.up * 20, ForceMode2D.Impulse);
                 float spinForce = 10f;
                 weaponRb.AddTorque(spinForce, ForceMode2D.Impulse);

@@ -1,9 +1,13 @@
+using UnityEngine;
+
 public interface IWeapon
 {
     int Damage { get; }
     float Speed { get; }
     bool IsThrowable { get; }
     float Cooldown { get; }
+    public Sprite equippedSprite { get; }
+    public Sprite unequippedSprite { get; }
     void Attack();
 }
 

@@ -10,8 +10,22 @@ public class RangedWeapon : MonoBehaviour, IRangedWeapon
     public int AmmoCount { get; private set; }
     public int MultiShotCount { get; private set; }
     public float Cooldown { get; private set; }
+    [SerializeField]
+    private Sprite _equippedSprite;
+    [SerializeField]
+    private Sprite _unequippedSprite;
 
+    public Sprite equippedSprite
+    {
+        get => _equippedSprite;
+        set => _equippedSprite = value;
+    }
 
+    public Sprite unequippedSprite
+    {
+        get => _unequippedSprite;
+        set => _unequippedSprite = value;
+    }
     public GameObject projectilePrefab; // Reference to the projectile prefab
     public Transform firePoint; // Where projectiles are spawned
     public float projectileForce = 10f;
